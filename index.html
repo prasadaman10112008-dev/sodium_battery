@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>NaS Solid‑State Battery Platform | TRL‑2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #212529;
+      --text-muted: #6c757d;
+      --accent: #b8860b;
+      --accent-dark: #8b6508;
+      --sidebar-bg: #0d1117;
+      --sidebar-text: #c9d1d9;
+      --sidebar-hover: #21262d;
+      --border: #dee2e6;
+      --radius: 10px;
+      --transition: 0.2s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px; min-width: 280px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 24px 0;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s ease, min-width 0.3s ease;
+      z-index: 100;
+    }
+    .sidebar.collapsed {
+      width: 0; min-width: 0; padding: 24px 0; overflow: hidden;
+    }
+    .sidebar .logo { font-weight: 700; font-size: 1rem; padding: 0 20px 20px; letter-spacing: -0.3px; color: #f0f0f0; white-space: nowrap; }
+    .sidebar .logo span { color: var(--accent); }
+
+    /* SIDEBAR TOGGLE BUTTON – now fixed on the right side of the viewport */
+    .sidebar-toggle {
+      position: fixed;
+      top: 24px;
+      right: 20px;                     /* moved to the right edge */
+      width: 26px;
+      height: 26px;
+      background: #ffffff;
+      color: #0d1117;
+      border: 1px solid #dee2e6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 110;
+      transition: background 0.2s;
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .sidebar-toggle:hover { background: #f0f0f0; }
+
+    /* NAVIGATION */
+    .nav-group { margin-bottom: 12px; }
+    .nav-group-title {
+      padding: 10px 20px; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: #8b949e; font-weight: 600; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      white-space: nowrap;
+    }
+    .nav-group-title:hover { color: #e6e6e6; }
+    .nav-items { list-style: none; display: none; }
+    .nav-items.open { display: block; }
+    .nav-items li a, .nav-link {
+      display: block; padding: 7px 20px 7px 32px;
+      font-size: 0.82rem; text-decoration: none;
+      color: var(--sidebar-text); transition: all var(--transition);
+      border-left: 3px solid transparent; cursor: pointer; white-space: nowrap;
+    }
+    .nav-items li a:hover, .nav-items li a.active, .nav-link:hover, .nav-link.active {
+      background: var(--sidebar-hover); color: #f0f0f0; border-left-color: var(--accent);
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 280px; flex: 1;
+      padding: 36px 28px; overflow-y: auto;
+      height: 100vh; transition: margin-left 0.3s ease;
+      max-width: 100vw;
+    }
+    .main-content.expanded { margin-left: 0; }
+
+    h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 18px; color: #1a1a1a; position: relative; display: inline-block; }
+    h2::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 46px; height: 3px; background: var(--accent); border-radius: 3px; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 18px 0 8px; color: #2a2a2a; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    /* TABLES */
+    table {
+      border-collapse: collapse; width: 100%;
+      background: var(--surface); border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); font-size: 0.82rem;
+    }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; }
+    th { background: #0d1117; color: #e0e0e0; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; }
+    tr:last-child td { border-bottom: 1px solid var(--border); }
+
+    /* RESPONSIVE */
+    @media (max-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .sidebar { width: 260px; min-width: 260px; }
+      .sidebar.collapsed { width: 0; min-width: 0; }
+      .main-content { margin-left: 260px; padding: 20px 16px; }
+      .main-content.expanded { margin-left: 0; }
+      .sidebar-toggle { right: 10px; }   /* tighter on mobile */
+    }
+    @media (max-width: 480px) {
+      .main-content { padding: 16px 12px; }
+      h2 { font-size: 1.3rem; }
+      h3 { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">NaS Solid‑State<span> Platform</span></div>
+
+    <a class="nav-link" data-section="intro" style="padding-left:20px; margin-bottom:10px;">Home</a>
+
+    <!-- PITCH DECK GROUP – CLOSED BY DEFAULT -->
+    <div class="nav-group">
+      <div class="nav-group-title" onclick="toggleGroup(this)">Pitch Deck ▸</div>
+      <ul class="nav-items" id="pitch-nav">
+        <li><a href="#" data-section="team">Team</a></li>
+        <li><a href="#" data-section="elevator">Elevator Pitch</a></li>
+        <li><a href="#" data-section="problem">Problem / Opportunity</a></li>
+        <li><a href="#" data-section="solution">Solution / Technology</a></li>
+        <li><a href="#" data-section="status">Current Status</a></li>
+        <li><a href="#" data-section="demo">Product Demo</a></li>
+        <li><a href="#" data-section="uvp">Unique Value Proposition</a></li>
+        <li><a href="#" data-section="competition">Competitive Advantage</a></li>
+        <li><a href="#" data-section="market">Customer Segments & Market</a></li>
+        <li><a href="#" data-section="channels">Channels</a></li>
+        <li><a href="#" data-section="revenue">Revenue Model</a></li>
+        <li><a href="#" data-section="costs">Costs</a></li>
+        <li><a href="#" data-section="metrics">Key Metrics & Validation</a></li>
+        <li><a href="#" data-section="plan">18‑Month Plan</a></li>
+      </ul>
+    </div>
+
+    <!-- RESEARCH REPORT GROUP – CLOSED BY DEFAULT -->
+    <div class="nav-group">
+      <div class="nav-group-title" onclick="toggleGroup(this)">Research Report ▸</div>
+      <ul class="nav-items" id="report-nav">
+        <li><a href="#" data-section="section1">1. Introduction</a></li>
+        <li><a href="#" data-section="section2">2. Industry Background</a></li>
+        <li><a href="#" data-section="section3">3. Battery Landscape</a></li>
+        <li><a href="#" data-section="section4">4. Problem Statement</a></li>
+        <li><a href="#" data-section="section5">5. Proposed Platform</a></li>
+        <li><a href="#" data-section="section6">6. Technical Benchmarks</a></li>
+        <li><a href="#" data-section="section7">7. Application Segments</a></li>
+        <li><a href="#" data-section="section8">8. Market Opportunity</a></li>
+        <li><a href="#" data-section="section9">9. Competitor Analysis</a></li>
+        <li><a href="#" data-section="section10">10. India Opportunity</a></li>
+        <li><a href="#" data-section="section11">11. Business Model</a></li>
+        <li><a href="#" data-section="section12">12. Commercialization Roadmap</a></li>
+        <li><a href="#" data-section="section13">13. Risk Analysis</a></li>
+        <li><a href="#" data-section="section14">14. Sustainability</a></li>
+        <li><a href="#" data-section="section15">15. Future Outlook</a></li>
+        <li><a href="#" data-section="section17">16. National Impact</a></li>
+            <li><a href="#" data-section="section16">17. Conclusion</a></li>
+      </ul>
+    </div>
+
+    <!-- COMPANY & PROGRESS GROUP – CLOSED BY DEFAULT -->
+    <div class="nav-group">
+      <div class="nav-group-title" onclick="toggleGroup(this)">Company & Progress ▸</div>
+      <ul class="nav-items" id="progress-nav">
+        <li><a href="#" data-section="milestone">Milestone Tracker</a></li>
+        <li><a href="#" data-section="ip">IP Registration</a></li>
+        <li><a href="#" data-section="funding">Funding & Grants</a></li>
+        <li><a href="#" data-section="teamprogress">Team Updates</a></li>
+        <li><a href="#" data-section="partnership">Partnerships & Incubator</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- SIDEBAR TOGGLE BUTTON – now fixed on the right side -->
+  <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">◀</button>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main-content"></main>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const mainContent = document.getElementById('main-content');
+
+    // Toggle sidebar collapse
+    function toggleSidebar() {
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+      if (sidebar.classList.contains('collapsed')) {
+        toggleBtn.innerHTML = '▶';
+        toggleBtn.title = 'Open Sidebar';
+      } else {
+        toggleBtn.innerHTML = '◀';
+        toggleBtn.title = 'Close Sidebar';
+      }
+    }
+    toggleBtn.addEventListener('click', toggleSidebar);
+
+    // Toggle nav groups (pitch deck, report, progress)
+    function toggleGroup(titleElem) {
+      const items = titleElem.nextElementSibling;
+      items.classList.toggle('open');
+      const txt = titleElem.textContent.trim();
+      const clean = txt.replace('▸','').replace('▾','').trim();
+      titleElem.textContent = items.classList.contains('open') ? clean + ' ▾' : clean + ' ▸';
+    }
+
+    // Click handler for all sidebar links
+    document.querySelectorAll('[data-section]').forEach(el => {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('[data-section]').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        const sectionId = this.dataset.section;
+        loadSection(sectionId);
+      });
+    });
+
+    function loadSection(sectionId) {
+      if (typeof window['load_' + sectionId] === 'function') {
+        window['load_' + sectionId](mainContent);
+      } else {
+        mainContent.innerHTML = `<h2>${sectionId}</h2><p>Content module not found.</p>`;
+      }
+    }
+
+    // Load intro on page start
+    window.addEventListener('DOMContentLoaded', () => loadSection('intro'));
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- All JS files -->
+  <script src="introduction.js"></script>
+  <script src="team.js"></script>
+  <script src="elevator.js"></script>
+  <script src="problem.js"></script>
+  <script src="solution.js"></script>
+  <script src="status.js"></script>
+  <script src="demo.js"></script>
+  <script src="uvp.js"></script>
+  <script src="competition.js"></script>
+  <script src="market.js"></script>
+  <script src="channel.js"></script>
+  <script src="revenue.js"></script>
+  <script src="cost.js"></script>
+  <script src="metrics.js"></script>
+  <script src="plan.js"></script>
+  <script src="section1.js"></script>
+  <script src="section2.js"></script>
+  <script src="section3.js"></script>
+  <script src="section4.js"></script>
+  <script src="section5.js"></script>
+  <script src="section6.js"></script>
+  <script src="section7.js"></script>
+  <script src="section8.js"></script>
+  <script src="section9.js"></script>
+  <script src="section10.js"></script>
+  <script src="section11.js"></script>
+  <script src="section12.js"></script>
+  <script src="section13.js"></script>
+  <script src="section14.js"></script>
+  <script src="section15.js"></script>
+  <script src="section16.js"></script>
+  <script src="section17.js"></script>
+  <script src="milestone.js"></script>
+  <script src="ip.js"></script>
+  <script src="funding.js"></script>
+  <script src="teamprogress.js"></script>
+  <script src="partnership.js"></script>
+</body>
+</html>
